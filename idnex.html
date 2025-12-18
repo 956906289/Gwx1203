@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 这一行让网页适配手机屏幕，非常重要 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小组共享看板</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>📝 小组实时留言板</h2>
+        
+        <!-- 输入区域 -->
+        <div class="input-box">
+            <input type="text" id="msgInput" placeholder="输入内容...">
+            <button id="sendBtn">发送</button>
+        </div>
+
+        <!-- 消息列表显示区域 -->
+        <ul id="msgList">
+            <li>加载中...</li>
+        </ul>
+    </div>
+
+    <!-- 引入 Firebase SDK -->
+    <script type="module">
+        // 1. 引入必要的 Firebase 库 (使用 CDN)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 2. 【这里粘贴你刚才复制的配置代码】
+        // ------------------------------------------------
+        const firebaseConfig = {
+  apiKey: "AIzaSyDTDeExIOqv-gtV_yFmC3JFc4RCHros2Pw",
+  authDomain: "team-d3afa.firebaseapp.com",
+  projectId: "team-d3afa",
+  storageBucket: "team-d3afa.firebasestorage.app",
+  messagingSenderId: "232024042720",
+  appId: "1:232024042720:web:5f4cab0e4d7d118a597485"
+};
+        // ------------------------------------------------
+
+        // 3. 初始化数据库
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const msgList = document.getElementById('msgList');
+        const sendBtn = document.getElementById('sendBtn');
+        const msgInput = document.getElementById('msgInput');
+
+        // 4. 监听数据库变化 (这就是实现多人同步的关键！)
+        // 只要数据库里有新数据，这个函数就会自动运行，更新界面
+        const q = query(collection(db, "messages"), orderBy("time", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            msgList.innerHTML = ""; // 清空列表
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const li = document.createElement('li');
+                li.textContent = data.text;
+                msgList.appendChild(li);
+            });
+        });
+
+        // 5. 发送数据功能
+        sendBtn.addEventListener('click', async () => {
+            const text = msgInput.value;
+            if (text.trim() === "") return;
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    text: text,
+                    time: serverTimestamp() // 记录服务器时间
+                });
+                msgInput.value = ""; // 清空输入框
+            } catch (e) {
+                alert("发送失败: " + e);
+            }
+        });
+    </script>
+</body>
+</html>
