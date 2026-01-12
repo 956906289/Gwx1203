@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人主页 | Your Name</title>
+    <style>
+        /* --- 1. 全局设置 (Reset & Variables) --- */
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(28, 28, 30, 0.6);
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --accent-glow: radial-gradient(circle, rgba(50, 50, 200, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            --font-stack: "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-stack);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- 2. 导航栏 (Glassmorphism) --- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        /* --- 3. 核心区域 (Hero Section) --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 20px;
+        }
+
+        /* 背景光晕效果 */
+        .glow-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60vw;
+            height: 60vw;
+            background: var(--accent-glow);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem); /* 响应式字体 */
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0; /* 动画初始状态 */
+            transform: translateY(30px);
+            animation: fadeUp 1s 0.2s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--text-muted);
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 1s 0.4s forwards cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* --- 4. Bento Grid (内容区域) --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 60px;
+            letter-spacing: -1px;
+            opacity: 0; /* 用于滚动触发 */
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        /* 网格布局 */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .card:hover {
+            transform: scale(1.02);
+            background: rgba(40, 40, 44, 0.8);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .card .tag {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            width: fit-content;
+        }
+
+        /* 特殊布局：跨列卡片 */
+        .card.wide {
+            grid-column: span 2;
+        }
+        @media (max-width: 768px) {
+            .card.wide { grid-column: span 1; }
+        }
+
+        /* --- 5. 底部 --- */
+        footer {
+            text-align: center;
+            padding: 80px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* --- 6. 动画类 (JavaScript触发) --- */
+        .visible {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 导航 -->
+    <nav>
+        <div class="logo">MySpace.</div>
+        <div class="nav-links">
+            <a href="#about">关于</a>
+            <a href="#work">作品</a>
+            <a href="#contact">联系</a>
+        </div>
+    </nav>
+
+    <!-- 头部 Hero -->
+    <section class="hero">
+        <div class="glow-bg"></div>
+        <h1>创造 极致 体验</h1>
+        <p>我是 高伟鑫，一名热衷于细节与交互的设计开发者。</p>
+    </section>
+
+    <!-- 关于与技能 (Bento Grid 风格) -->
+    <section class="container" id="about">
+        <h2 class="section-title reveal">个人概览</h2>
+        <div class="bento-grid">
+            <!-- 宽卡片 -->
+            <div class="card wide reveal">
+                <div>
+                    <h3>关于我</h3>
+                    <p style="margin-top:15px;">在这里填入你的自我介绍。保持简短有力，类似于Apple的文案风格。例如：“不仅是代码，更是艺术。专注于构建高性能、高可用的数字产品。”</p>
+                </div>
+            </div>
+            
+            <!-- 小卡片 1 -->
+            <div class="card reveal">
+                <h3>技术栈</h3>
+                <p>React, Vue, Swift, Node.js</p>
+                <span class="tag">Full Stack</span>
+            </div>
+
+            <!-- 小卡片 2 -->
+            <div class="card reveal">
+                <h3>设计工具</h3>
+                <p>Figma, Blender, Photoshop</p>
+                <span class="tag">UI/UX Design</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品集 -->
+    <section class="container" id="work">
+        <h2 class="section-title reveal">精选项目</h2>
+        <div class="bento-grid">
+            <div class="card reveal">
+                <h3>项目名称 A</h3>
+                <p>一个极简主义的任务管理应用，专注于提升心流体验。</p>
+                <span class="tag">iOS App</span>
+            </div>
+            <div class="card reveal">
+                <h3>项目名称 B</h3>
+                <p>基于AI的数据可视化大屏，实时渲染百万级数据点。</p>
+                <span class="tag">Web Platform</span>
+            </div>
+            <div class="card reveal">
+                <h3>项目名称 C</h3>
+                <p>智能家居控制中心的设计概念。</p>
+                <span class="tag">IoT Concept</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer id="contact">
+        <p>Copyright © 2024 [你的名字]. All rights reserved.</p>
+        <p style="margin-top:10px;">Email: your.email@example.com</p>
+    </footer>
+
+    <script>
+        // 简单的滚动显现动画逻辑
+        const observerOptions = {
+            threshold: 0.1, // 当元素出现10%时触发
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // 可选：如果只想触发一次，取消注释下面这行
+                    // observer.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
